@@ -119,6 +119,7 @@ export async function askCopper(
             reply += part.text;
             break;
           case "error":
+            console.error("[ask-copper] model error:", part.error);
             failed = true;
             break;
           default:
@@ -130,7 +131,8 @@ export async function askCopper(
       // Only an empty reply is replaced, never a real one.
       if (!reply.trim()) reply = APOLOGY;
       done(snapshot(failed ? "error" : "done"));
-    } catch {
+    } catch (error) {
+      console.error("[ask-copper] failed:", error);
       if (!reply.trim()) reply = APOLOGY;
       done(snapshot("error"));
     }

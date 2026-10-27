@@ -124,7 +124,7 @@ export function AskCopper({ aiConfigured }: { aiConfigured: boolean }) {
           showCloseButton={false}
           className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-lg"
         >
-          <header className="bg-chart-5 text-white">
+          <header className="bg-chart-5 text-background">
             <div className="flex items-center gap-3 p-4">
               <span className="bg-primary flex size-10 shrink-0 items-center justify-center rounded-full">
                 <Image
@@ -136,8 +136,8 @@ export function AskCopper({ aiConfigured }: { aiConfigured: boolean }) {
                 />
               </span>
               <div className="min-w-0 flex-1">
-                <SheetTitle className="text-white">Ask Copper</SheetTitle>
-                <SheetDescription className="text-white/80">
+                <SheetTitle className="text-background">Ask Copper</SheetTitle>
+                <SheetDescription className="text-background/80">
                   Prices, totals and stock, checked with tools.
                 </SheetDescription>
               </div>
@@ -145,7 +145,7 @@ export function AskCopper({ aiConfigured }: { aiConfigured: boolean }) {
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  className="text-white hover:bg-white/10 hover:text-white"
+                  className="text-background hover:bg-background/10 hover:text-background"
                 >
                   <XIcon />
                   <span className="sr-only">Close</span>
@@ -153,9 +153,9 @@ export function AskCopper({ aiConfigured }: { aiConfigured: boolean }) {
               </SheetClose>
             </div>
             {aiConfigured ? (
-              <div className="flex items-center gap-3 bg-white/10 px-4 py-2">
+              <div className="flex items-center gap-3 bg-background/10 px-4 py-2">
                 <span className="text-sm font-medium">Use tools</span>
-                <span className="text-xs text-white/70">
+                <span className="text-xs text-background/70">
                   {useTools ? "Checks every answer" : "Model guesses alone"}
                 </span>
                 <Switch
