@@ -12,10 +12,17 @@ vi.mock("@ai-sdk/google", () => ({
   createGoogleGenerativeAI: () => () => model,
 }));
 
-type Part = Parameters<typeof convertArrayToReadableStream<ModelStreamPart>>[0][number];
+type Part = Parameters<
+  typeof convertArrayToReadableStream<ModelStreamPart>
+>[0][number];
 
 const usage = {
-  inputTokens: { total: 10, noCache: 10, cacheRead: undefined, cacheWrite: undefined },
+  inputTokens: {
+    total: 10,
+    noCache: 10,
+    cacheRead: undefined,
+    cacheWrite: undefined,
+  },
   outputTokens: { total: 5, text: 5, reasoning: undefined },
 };
 const finish = (reason: "stop" | "tool-calls"): Part => ({
@@ -33,9 +40,13 @@ const says = (text: string, thinking?: string): Part[] => [
       ] as Part[])
     : []),
   { type: "text-start", id: "t1" },
-  ...text.split(" ").map(
-    (word, i): Part => ({ type: "text-delta", id: "t1", delta: i === 0 ? word : ` ${word}` }),
-  ),
+  ...text
+    .split(" ")
+    .map((word, i): Part => ({
+      type: "text-delta",
+      id: "t1",
+      delta: i === 0 ? word : ` ${word}`,
+    })),
   { type: "text-end", id: "t1" },
   finish("stop"),
 ];
@@ -43,7 +54,12 @@ const says = (text: string, thinking?: string): Part[] => [
 const calls = (toolName: string, input: unknown): Part[] => [
   { type: "tool-input-start", id: "call-1", toolName },
   { type: "tool-input-end", id: "call-1" },
-  { type: "tool-call", toolCallId: "call-1", toolName, input: JSON.stringify(input) },
+  {
+    type: "tool-call",
+    toolCallId: "call-1",
+    toolName,
+    input: JSON.stringify(input),
+  },
   finish("tool-calls"),
 ];
 
@@ -85,17 +101,26 @@ describe("askCopper", () => {
       }),
       says("That is $307", "Working it out"),
     );
-    const updates = await updatesOf({ ...ask, messages: [...ask.messages], useTools: true });
+    const updates = await updatesOf({
+      ...ask,
+      messages: [...ask.messages],
+      useTools: true,
+    });
 
     const first = updates.find((u) => u.steps.some((s) => s.type === "tool"))!;
-    expect(first.steps[0]).toMatchObject({ name: "calculate_cost", state: "calling" });
+    expect(first.steps[0]).toMatchObject({
+      name: "calculate_cost",
+      state: "calling",
+    });
     expect(first.steps[0]).not.toHaveProperty("input");
 
     const last = updates.at(-1)!;
     expect(last.status).toBe("done");
     expect(last.reply).toBe("That is $307");
     expect(last.steps.filter((s) => s.type === "tool")).toHaveLength(1);
-    expect(last.steps).toContainEqual(expect.objectContaining({ type: "thinking" }));
+    expect(last.steps).toContainEqual(
+      expect.objectContaining({ type: "thinking" }),
+    );
     expect(last.steps.find((s) => s.type === "tool")).toMatchObject({
       state: "done",
       output: { totalUsd: 307 },
@@ -104,8 +129,14 @@ describe("askCopper", () => {
 
   it("sends each update as a fresh copy, with a reply that only grows", async () => {
     model = modelStreaming(says("one two three", "Thinking"));
-    const updates = await updatesOf({ ...ask, messages: [...ask.messages], useTools: false });
-    const thinking = updates.filter((u) => u.steps.length).map((u) => u.steps[0]);
+    const updates = await updatesOf({
+      ...ask,
+      messages: [...ask.messages],
+      useTools: false,
+    });
+    const thinking = updates
+      .filter((u) => u.steps.length)
+      .map((u) => u.steps[0]);
     expect(new Set(thinking).size).toBe(thinking.length);
     updates.reduce((prev, u) => {
       expect(u.reply.startsWith(prev)).toBe(true);
@@ -124,7 +155,9 @@ describe("askCopper", () => {
       "get_prices",
       "get_products",
     ]);
-    expect(JSON.stringify(on.prompt)).toContain(COPPER_INSTRUCTIONS.trim().slice(0, 30));
+    expect(JSON.stringify(on.prompt)).toContain(
+      COPPER_INSTRUCTIONS.trim().slice(0, 30),
+    );
 
     model = modelStreaming(says("hi"));
     await updatesOf({ ...ask, messages: [...ask.messages], useTools: false });
@@ -145,7 +178,9 @@ describe("askCopper", () => {
 
   it("apologizes, still done, when the reply is empty", async () => {
     model = modelStreaming(says(""));
-    const last = (await updatesOf({ ...ask, messages: [...ask.messages], useTools: false })).at(-1)!;
+    const last = (
+      await updatesOf({ ...ask, messages: [...ask.messages], useTools: false })
+    ).at(-1)!;
     expect(last.status).toBe("done");
     expect(last.reply).not.toBe("");
   });
@@ -156,7 +191,9 @@ describe("askCopper", () => {
         throw new Error("boom");
       },
     });
-    const last = (await updatesOf({ ...ask, messages: [...ask.messages], useTools: false })).at(-1)!;
+    const last = (
+      await updatesOf({ ...ask, messages: [...ask.messages], useTools: false })
+    ).at(-1)!;
     expect(last.status).toBe("error");
     expect(last.reply).not.toBe("");
   });

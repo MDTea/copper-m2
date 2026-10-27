@@ -25,7 +25,12 @@ export type ProductList = {
 
 export type Prices = {
   products: { id: ProductId; name: string; priceUsd: number }[];
-  plans: { id: Plan["id"]; name: string; monthlyUsd: number; annualUsd: number }[];
+  plans: {
+    id: Plan["id"];
+    name: string;
+    monthlyUsd: number;
+    annualUsd: number;
+  }[];
 };
 
 export type CalculateCostInput = {
@@ -165,7 +170,9 @@ export async function checkAvailability(
 
   const colors: Extract<Availability, { status: "ok" }>["colors"] = [];
   for (const color of wanted ? [wanted] : product.colors) {
-    const row = rows.find((r) => r.product === product.name && r.color === color);
+    const row = rows.find(
+      (r) => r.product === product.name && r.color === color,
+    );
     if (!row) continue;
     const units = row.units_in_stock;
     colors.push(

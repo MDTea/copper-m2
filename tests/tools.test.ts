@@ -14,7 +14,12 @@ import { readInventory } from "@/lib/copper/inventory";
 vi.mock("@/lib/copper/inventory", () => ({ readInventory: vi.fn() }));
 const mockInventory = vi.mocked(readInventory);
 
-const row = (product: string, color: string, units: number, ship = "2026-11-14") => ({
+const row = (
+  product: string,
+  color: string,
+  units: number,
+  ship = "2026-11-14",
+) => ({
   sku: `${product}-${color}`,
   product,
   color,
@@ -91,7 +96,11 @@ describe("get_products and get_prices", () => {
   it("lists every product with its colors", () => {
     const { products } = listProducts();
     expect(products.map((p) => p.id)).toEqual(["copper-home", "copper-notes"]);
-    expect(products[1].colors).toEqual(["Brushed Copper", "Desert Sand", "Night Sky"]);
+    expect(products[1].colors).toEqual([
+      "Brushed Copper",
+      "Desert Sand",
+      "Night Sky",
+    ]);
   });
 
   it("lists every product and plan price", () => {
@@ -107,7 +116,8 @@ describe("get_products and get_prices", () => {
       "get_prices",
       "get_products",
     ]);
-    for (const t of Object.values(copperTools)) expect(t.description).toBeTruthy();
+    for (const t of Object.values(copperTools))
+      expect(t.description).toBeTruthy();
   });
 });
 
@@ -136,7 +146,10 @@ describe("check_availability", () => {
   });
 
   it("matches one color in any capitalization, answering in the catalog's", async () => {
-    const result = await checkAvailability({ product: "copper-home", color: "patina TEAL" });
+    const result = await checkAvailability({
+      product: "copper-home",
+      color: "patina TEAL",
+    });
     expect(result).toMatchObject({
       status: "ok",
       colors: [{ color: "Patina Teal", stock: "low_stock" }],
@@ -145,7 +158,10 @@ describe("check_availability", () => {
 
   it("says not_a_color for a color the product doesn't come in, even without stock", async () => {
     mockInventory.mockResolvedValue(null);
-    const result = await checkAvailability({ product: "copper-notes", color: "Patina Teal" });
+    const result = await checkAvailability({
+      product: "copper-notes",
+      color: "Patina Teal",
+    });
     expect(result).toEqual({
       status: "not_a_color",
       product: "Copper Notes",
@@ -158,7 +174,9 @@ describe("check_availability", () => {
     mockInventory.mockResolvedValue(null);
     const result = await checkAvailability({ product: "copper-home" });
     expect(result.status).toBe("unavailable");
-    expect(JSON.stringify(result)).not.toMatch(/in_stock|low_stock|backordered/);
+    expect(JSON.stringify(result)).not.toMatch(
+      /in_stock|low_stock|backordered/,
+    );
   });
 
   it("reads stock fresh every time", async () => {
@@ -168,7 +186,11 @@ describe("check_availability", () => {
   });
 
   it("only accepts Copper products", () => {
-    expect(checkAvailabilityInput.safeParse({ product: "copper-max" }).success).toBe(false);
-    expect(checkAvailabilityInput.safeParse({ product: "copper-home" }).success).toBe(true);
+    expect(
+      checkAvailabilityInput.safeParse({ product: "copper-max" }).success,
+    ).toBe(false);
+    expect(
+      checkAvailabilityInput.safeParse({ product: "copper-home" }).success,
+    ).toBe(true);
   });
 });
